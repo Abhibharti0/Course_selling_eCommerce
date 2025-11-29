@@ -1,8 +1,25 @@
 import User from "../models/user.model.js";
 import bcrypt from "bcryptjs";
+import {z} from 'zod';
+
 
 export const signup = async (req,res) =>{
     const {firstname,lastname,email,password} = req.body;
+
+     const userSchema = z.object({
+    firstname: z.string().min(3, { message: "First name must be atleast 3 char long" }),
+    lastname: z.string().min(3, { message: "Last name  must be atleast 3 char long" }),
+    email: z.string().email({ message: "Invalid email address" }),
+    password: z.string().min(8, { message: "Password must be at least 8 characters long" }),
+  });
+
+  const validation = userSchema.safeParse(req.body);
+
+  if (!validation.success) {
+    return res.status(400).json({ errors: validation.error.issues.map((err)=> err.message) });
+  }
+
+
 
     const hashedPassword = await bcrypt.hash(password,10);
 
