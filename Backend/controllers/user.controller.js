@@ -3,6 +3,8 @@ import bcrypt from "bcryptjs";
 import {z} from 'zod';
 import jwt from "jsonwebtoken";
 import config from "../config.js";
+import Purchase from "../models/purchase.model.js";
+import Course from "../models/course.model.js";
 
 
 export const signup = async (req,res) =>{
@@ -90,3 +92,25 @@ export const logout = (req, res) => {
     console.log("error", error);
   } 
 }
+
+
+export const mycourse = async (req, res) => {
+    const userId= req.userId;
+
+    try {
+        const purchased = await Purchase.find({userId})
+
+        let purchasedCoursesid = [];
+
+        for (let i = 0; i < purchased.length; i++) {
+            purchasedCoursesid.push(purchased[i].courseId);
+
+           
+        }
+         const courseData = await Course.find({_id:{ $in: purchasedCoursesid }});
+        res.status(200).json({ purchased,courseData });
+}catch (error) {
+    console.error("error", error);
+    res.status(500).json({ message: "Server Error" });
+}
+};
