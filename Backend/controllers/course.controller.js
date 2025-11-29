@@ -52,3 +52,42 @@ export const createCourse = async (req, res) => {
     return res.status(500).json({ message: "Server Error" });
   }
 };
+
+
+
+
+export const updateCourse = async (req, res) => {
+  const { id } = req.params; // this is the actual ID sent
+  const { title, description, price, image } = req.body;
+
+  try {
+    // Get existing course first (so fallback image works)
+    const existingCourse = await Course.findById(id);
+    if (!existingCourse) {
+      return res.status(404).json({ message: "Course not found" });
+    }
+
+    // Prepare updated data
+    const updatedData = {
+      title,
+      description,
+      price,
+      image: {
+        public_id: image?.public_id || existingCourse.image.public_id,
+        url: image?.url || existingCourse.image.url,
+      }
+    };
+
+    // Update the course
+    const course = await Course.updateOne({ _id: id }, updatedData);
+
+    res.status(200).json({
+      message: "Course updated successfully",
+      course
+    });
+
+  } catch (error) {
+    console.log("error", error);
+    res.status(500).json({ message: "Server Error" });
+  }
+};

@@ -11,6 +11,8 @@ dotenv.config();
 
 
 app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+
 
 app.use(fileUpload({
   useTempFiles: true,
@@ -29,6 +31,7 @@ try {
 
 //define routes
 app.use('/api/courses', courseRoutes);
+
 
 //cloudinary configuration
 cloudinary.config({
