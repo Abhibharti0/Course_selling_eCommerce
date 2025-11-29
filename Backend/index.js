@@ -7,8 +7,10 @@ import courseRoutes from './routes/course.route.js';
 import userRoutes from './routes/user.routes.js';
 import fileUpload from 'express-fileupload';
 
+
 const app = express();
 dotenv.config();
+
 
 
 app.use(express.json());

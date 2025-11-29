@@ -1,6 +1,8 @@
 import User from "../models/user.model.js";
 import bcrypt from "bcryptjs";
 import {z} from 'zod';
+import jwt from "jsonwebtoken";
+import config from "../config.js";
 
 
 export const signup = async (req,res) =>{
@@ -57,7 +59,13 @@ export const login = async (req,res) =>{
         if (!isPasswordCorrect) {
             return res.status(400).json({ message: "Invalid email or password" });
         } 
-        res.status(200).json({message:"Login successful", user});
+        //jwt token generation
+        const token = jwt.sign(
+           {id:user.id
+           }, config.JWT_USER_PASSWORD);
+
+           res.cookie("jwt", token)
+        res.status(200).json({message:"Login successful", user,token});
 } catch(error){
     res.status(500).json({message:"Error in login"});
     console.log("error", error);
