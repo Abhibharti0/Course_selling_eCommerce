@@ -71,3 +71,14 @@ export const login = async (req,res) =>{
     console.log("error", error);
 }
 }
+
+
+export const logout = (req, res) => {
+  try {
+    res.clearCookie("jwt");
+    res.status(200).json({ message: "Logout successful" });
+  } catch (error) {
+    res.status(500).json({ message: "Error in logout" });
+    console.log("error", error);
+  } 
+}
