@@ -62,9 +62,17 @@ export const login = async (req,res) =>{
         //jwt token generation
         const token = jwt.sign(
            {id:user.id
-           }, config.JWT_USER_PASSWORD);
+           }, config.JWT_USER_PASSWORD,
+           {expiresIn:'1d'});
 
-           res.cookie("jwt", token)
+           const cookieOptions = {
+            expiresIn: new Date(Date.now() + 24 * 60 * 60 * 1000),
+            httpOnly: true,
+            secure: process.env.NODE_ENV === 'production',
+            sameSite: 'strict',
+           };
+
+           res.cookie("jwt", token,cookieOptions)
         res.status(200).json({message:"Login successful", user,token});
 } catch(error){
     res.status(500).json({message:"Error in login"});
