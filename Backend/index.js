@@ -4,6 +4,7 @@ import mongoose from 'mongoose';
 import {v2 as cloudinary} from 'cloudinary';
 
 import courseRoutes from './routes/course.route.js';
+import userRoutes from './routes/user.routes.js';
 import fileUpload from 'express-fileupload';
 
 const app = express();
@@ -31,6 +32,7 @@ try {
 
 //define routes
 app.use('/api/courses', courseRoutes);
+app.use('/api/users', userRoutes);
 
 
 //cloudinary configuration
