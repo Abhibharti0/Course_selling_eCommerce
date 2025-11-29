@@ -106,3 +106,16 @@ export const deleteCourse = async (req, res) => {
     res.status(500).json({ message: "Server Error" });
   }
 };
+
+export const getAllCourses = async (req, res) => {
+  try {
+    const courses = await Course.find();      
+    res.status(200).json({ courses });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Server Error" });
+  }
+};
+
+
+
