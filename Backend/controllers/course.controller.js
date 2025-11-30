@@ -4,6 +4,8 @@ import {v2 as cloudinary} from 'cloudinary';
 
 
 export const createCourse = async (req, res) => {
+  const adminId = req.adminId;
+  console.log("adminId in createCourse:", adminId);
   const { title, description, price } = req.body;
   console.log(req.body);
 
@@ -37,7 +39,8 @@ export const createCourse = async (req, res) => {
       image:{
         public_id: cloud_response.public_id,
         url: cloud_response.secure_url,
-      }
+      },
+      creatorId: adminId,
     };
 
     // IMPORTANT: await database call
@@ -58,15 +61,19 @@ export const createCourse = async (req, res) => {
 
 
 export const updateCourse = async (req, res) => {
+  const adminId = req.adminId;
+ 
   const { id } = req.params; // this is the actual ID sent
+
   const { title, description, price, image } = req.body;
 
   try {
     // Get existing course first (so fallback image works)
-    const existingCourse = await Course.findById(id);
-    if (!existingCourse) {
-      return res.status(404).json({ message: "Course not found" });
-    }
+    const existingCourse = await Course.findOneAndUpdate({ _id: id, creatorId: adminId });
+if (!existingCourse) {
+  return res.status(404).json({ message: "Course not found or not authorized" });
+}
+
 
     // Prepare updated data
     const updatedData = {
@@ -80,7 +87,7 @@ export const updateCourse = async (req, res) => {
     };
 
     // Update the course
-    const course = await Course.updateOne({ _id: id }, updatedData);
+    const course = await Course.updateOne({ _id: id,creatorId:adminId }, updatedData);
 
     res.status(200).json({
       message: "Course updated successfully",
@@ -95,9 +102,11 @@ export const updateCourse = async (req, res) => {
 
 
 export const deleteCourse = async (req, res) => {
+  const adminId = req.adminId;
   const { id } = req.params;    
   try {
-    const course = await Course.findByIdAndDelete(id);
+    const course = await Course.findOneAndDelete({_id: id, creatorId: adminId});
+
     if (!course) {
       return res.status(404).json({ message: "Course not found" });
     }     

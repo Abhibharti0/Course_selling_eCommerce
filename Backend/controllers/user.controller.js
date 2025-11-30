@@ -85,6 +85,9 @@ export const login = async (req,res) =>{
 
 export const logout = (req, res) => {
   try {
+    if(!req.cookies.jwt){
+      return res.status(400).json({ message: "kindly login first" });
+    }
     res.clearCookie("jwt");
     res.status(200).json({ message: "Logout successful" });
   } catch (error) {

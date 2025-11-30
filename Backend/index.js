@@ -7,12 +7,14 @@ import courseRoutes from './routes/course.route.js';
 import userRoutes from './routes/user.routes.js';
 import adminRoutes from './routes/admin.route.js';
 import fileUpload from 'express-fileupload';
+import cookieParser from 'cookie-parser';
+
 
 
 const app = express();
 dotenv.config();
 
-
+app.use(cookieParser());
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
