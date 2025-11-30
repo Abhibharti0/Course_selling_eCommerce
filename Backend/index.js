@@ -5,6 +5,7 @@ import {v2 as cloudinary} from 'cloudinary';
 
 import courseRoutes from './routes/course.route.js';
 import userRoutes from './routes/user.routes.js';
+import adminRoutes from './routes/admin.route.js';
 import fileUpload from 'express-fileupload';
 
 
@@ -35,6 +36,7 @@ try {
 //define routes
 app.use('/api/courses', courseRoutes);
 app.use('/api/users', userRoutes);
+app.use('/api/admin', adminRoutes);
 
 
 //cloudinary configuration
