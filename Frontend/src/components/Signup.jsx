@@ -34,7 +34,7 @@ const [lastname, setlastname] = useState("");
 );
 
       console.log("Signup successful: ", response.data);
-     alert(response.data.message);
+     toast.success(response.data.message);
     } catch (error) {
       if (error.response) {
         setErrorMessage(

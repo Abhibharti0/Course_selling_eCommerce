@@ -8,9 +8,41 @@ import axios from 'axios';
 import Slider from "react-slick";
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
+import toast from 'react-hot-toast';
 
 const Home = () => {
   const [courses, setCourses] = useState([]);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+
+   useEffect(() => {
+    const user = localStorage.getItem("user");
+    if (user) {
+      setIsLoggedIn(true);
+    } else {
+      setIsLoggedIn(false);
+    }
+  }, []);
+
+
+  const handleLogout = async () => {
+  try {
+    const response = await axios.get(
+  'http://localhost:5000/api/users/logout',
+  { withCredentials: true }
+);
+
+
+    toast.success(response.data.message);
+    localStorage.removeItem("user");
+    setIsLoggedIn(false);
+
+  } catch (error) {
+    console.log("Error in logging out:", error);
+    toast.error(error.response?.data?.message || "Error in logging out");
+  }
+};
+
+
 
    useEffect(() => {
      const fetchCourses =async () => {
@@ -84,10 +116,33 @@ const Home = () => {
             <img src={logo} alt="CourseHaven logo" className='w-8 sm:w-10 h-8 sm:h-10 rounded-full shadow-md' />
             <h1 className='text-xl sm:text-2xl text-orange-500 font-bold drop-shadow-lg'>CourseHaven</h1>
           </div>
-          <nav className='space-x-3 sm:space-x-5'>
-            <Link to="/login" className='bg-transparent text-white py-2 px-4 border border-white rounded-lg hover:bg-white hover:text-black transition-all duration-300 shadow-md hover:shadow-xl'>Login</Link>
-            <Link to="/signup" className='bg-transparent text-white py-2 px-4 border border-white rounded-lg hover:bg-white hover:text-black transition-all duration-300 shadow-md hover:shadow-xl'>Signup</Link>
-          </nav>
+          <div className='space-x-3 sm:space-x-5'>
+  {isLoggedIn ? (
+    <button 
+      onClick={handleLogout}
+      className='bg-transparent text-white py-2 px-4 border border-white rounded-lg hover:bg-white hover:text-black transition-all duration-300 shadow-md hover:shadow-xl'
+    >
+      Logout
+    </button>
+  ) : (
+    <>
+      <Link 
+        to="/login"
+        className='bg-transparent text-white py-2 px-4 border border-white rounded-lg hover:bg-white hover:text-black transition-all duration-300 shadow-md hover:shadow-xl'
+      >
+        Login
+      </Link>
+
+      <Link 
+        to="/signup"
+        className='bg-transparent text-white py-2 px-4 border border-white rounded-lg hover:bg-white hover:text-black transition-all duration-300 shadow-md hover:shadow-xl'
+      >
+        Signup
+      </Link>
+    </>
+  )}
+</div>
+
         </header>
 
         {/* Main Section */}
