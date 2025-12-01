@@ -8,6 +8,7 @@ import userRoutes from './routes/user.routes.js';
 import adminRoutes from './routes/admin.route.js';
 import fileUpload from 'express-fileupload';
 import cookieParser from 'cookie-parser';
+import cors from 'cors';
 
 
 
@@ -24,6 +25,14 @@ app.use(fileUpload({
   useTempFiles: true,
   tempFileDir: '/tmp/',
 }));
+
+app.use(cors({
+  origin: process.env.FRONTEND_URL,
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
+ 
+}))
 
 const PORT = process.env.PORT || 5000;
 const mongoUrl = process.env.MONGO_URL;
