@@ -23,11 +23,7 @@ export const signup = async (req,res) =>{
     return res.status(400).json({ errors: validation.error.issues.map((err)=> err.message) });
   }
 
-
-
     const hashedPassword = await bcrypt.hash(password,10);
-
-
     try{
     const existingUser = await User.findOne({email});
     if(existingUser){
