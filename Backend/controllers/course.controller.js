@@ -154,11 +154,11 @@ export const buyCourses = async (req, res) => {
   try {
     const course = await Course.findById(courseId);
     if (!course) {
-      return res.status(404).json({ message: "Course not found" });
+      return res.status(404).json({ errors: "Course not found" });
     }
     const existingPurchase = await Purchase.findOne({  userId, courseId });
     if (existingPurchase) {
-      return res.status(400).json({ message: "Course already purchased" });
+      return res.status(400).json({ errors: "Course already purchased" });
     } 
     const newPurchase = new Purchase({
        userId,
@@ -170,8 +170,8 @@ export const buyCourses = async (req, res) => {
        newPurchase
     });
 
-  }  catch (error) {
-    console.error("Purchase error:", error);
+  }  catch (errors) {
+    console.error("Purchase error:", errors);
     return res.status(500).json({ message: "Server Error" });
   }
 };
