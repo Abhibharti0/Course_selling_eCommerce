@@ -1,5 +1,5 @@
 import express from 'express';
-import { createCourse,updateCourse,deleteCourse,getAllCourses, getCourseById,buyCourses} from '../controllers/course.controller.js';
+import { createCourse,updateCourse,deleteCourse,getAllCourses, getCourseById,buyCourses, createPaymentIntent} from '../controllers/course.controller.js';
 
 import usermiddleware from '../middlewares/user.mid.js';
 import adminmiddleware from '../middlewares/admin.mid.js';
@@ -12,6 +12,9 @@ router.put('/update/:id', adminmiddleware,updateCourse);
 router.delete('/delete/:id', adminmiddleware,deleteCourse);
 router.get('/allcourses', getAllCourses);
 router.get('/getonecouse/:id', getCourseById);
+
+router.post("/payment-intent/:courseId", usermiddleware, createPaymentIntent);
+
 
 
 router.post("/buy/:courseId",usermiddleware, buyCourses);

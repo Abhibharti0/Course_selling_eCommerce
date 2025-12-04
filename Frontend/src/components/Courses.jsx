@@ -41,6 +41,8 @@ function Courses() {
     fetchCourses();
   }, []);
 
+  
+
   // Logout
   const handleLogout = async () => {
     try {
