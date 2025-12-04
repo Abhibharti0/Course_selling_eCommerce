@@ -24,7 +24,7 @@ export const createCourse = async (req, res) => {
     const allowedFormats = ["image/jpeg", "image/png", "image/jpg"];
 
     if (!allowedFormats.includes(image.mimetype)) {
-      return res.status(400).json({ message: "Only jpg, jpeg and png are allowed" });
+      return res.status(400).json({ message: "Only jpg, jpeg and png allowed" });
     }
 
     const upload = await cloudinary.uploader.upload(image.tempFilePath, {
@@ -129,11 +129,22 @@ export const getCourseById = async (req, res) => {
 // ------------------------- CREATE PAYMENT INTENT -------------------------
 export const createPaymentIntent = async (req, res) => {
   try {
+
+    // ⭐ STOP USER IF ALREADY PURCHASED
+    const already = await Purchase.findOne({
+      userId: req.userId,
+      courseId: req.params.courseId,
+    });
+
+    if (already) {
+      return res.status(400).json({ errors: "Course already purchased" });
+    }
+
     const course = await Course.findById(req.params.courseId);
     if (!course) return res.status(404).json({ message: "Course not found" });
 
     const paymentIntent = await stripe.paymentIntents.create({
-      amount: course.price * 100,  // price in cents
+      amount: course.price * 100,
       currency: "usd",
       automatic_payment_methods: { enabled: true },
     });
@@ -164,9 +175,6 @@ export const buyCourses = async (req, res) => {
     if (existingPurchase) {
       return res.status(400).json({ errors: "Course already purchased" });
     }
-
-    // ❌ REMOVE PAYMENT INTENT CREATION HERE
-    // ❌ DO NOT create paymentIntent in buy route
 
     const newPurchase = new Purchase({
       userId,

@@ -1,7 +1,7 @@
 import axios from "axios";
 import React, { useEffect, useState } from "react";
 import { CardElement, useElements, useStripe } from "@stripe/react-stripe-js";
-import { Link, useNavigate, useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { BACKEND_URL } from "../utils/utils";
 import toast from "react-hot-toast";
 
@@ -14,37 +14,51 @@ function Buy() {
 
   const [course, setCourse] = useState({});
   const [clientSecret, setClientSecret] = useState("");
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [cardError, setCardError] = useState("");
   const [error, setError] = useState("");
 
+  // Get user from localStorage
   const user = JSON.parse(localStorage.getItem("user"));
   const token = user?.token;
 
   if (!token) navigate("/login");
 
-  // ⭐ STEP 1 — Load Payment Intent
+  // Safe extraction of user email & id (works in all structures)
+  const userEmail = user?.user?.email || user?.email;
+  const userId = user?.user?._id || user?._id;
+
+  // ⭐ STEP 1 — Fetch PaymentIntent + Course Info
   useEffect(() => {
-    const loadIntent = async () => {
+    const fetchPaymentIntent = async () => {
       try {
         const res = await axios.post(
           `${BACKEND_URL}/api/courses/payment-intent/${courseId}`,
           {},
-          { headers: { Authorization: `Bearer ${token}` } }
+          {
+            headers: { Authorization: `Bearer ${token}` },
+          }
         );
 
         setCourse(res.data.course);
         setClientSecret(res.data.clientSecret);
       } catch (err) {
-        console.log(err);
-        setError("Could not start payment");
+        if (err?.response?.status === 400) {
+          toast.error("You already purchased this course!");
+          navigate("/purchases");
+          return;
+        }
+        setError("Payment initialization failed");
       }
+
+      setLoading(false);
     };
 
-    loadIntent();
+    fetchPaymentIntent();
   }, [courseId]);
 
-  // ⭐ STEP 2 — Final Payment Handler
+
+  // ⭐ STEP 2 — Handle Payment + Save Order
   const handlePurchase = async (e) => {
     e.preventDefault();
 
@@ -53,9 +67,15 @@ function Buy() {
     setLoading(true);
     setCardError("");
 
+    if (!clientSecret) {
+      toast.error("Client secret missing");
+      setLoading(false);
+      return;
+    }
+
     const card = elements.getElement(CardElement);
     if (!card) {
-      toast.error("Card field missing");
+      toast.error("Card input missing");
       setLoading(false);
       return;
     }
@@ -68,12 +88,11 @@ function Buy() {
 
     if (pmError) {
       toast.error(pmError.message);
-      setCardError(pmError.message);
       setLoading(false);
       return;
     }
 
-    // Confirm Payment with Stripe
+    // Confirm Payment
     const { paymentIntent, error: confirmError } =
       await stripe.confirmCardPayment(clientSecret, {
         payment_method: { card },
@@ -81,7 +100,6 @@ function Buy() {
 
     if (confirmError) {
       toast.error(confirmError.message);
-      setCardError(confirmError.message);
       setLoading(false);
       return;
     }
@@ -89,104 +107,79 @@ function Buy() {
     // ⭐ PAYMENT SUCCESS
     if (paymentIntent.status === "succeeded") {
       try {
-        // ⭐ MUST — Save Purchase in DB
-        await axios.post(
-          `${BACKEND_URL}/api/courses/buy/${courseId}`,
-          {
-            paymentId: paymentIntent.id,
-            amount: paymentIntent.amount,
-          },
-          { headers: { Authorization: `Bearer ${token}` } }
-        );
+        const orderInfo = {
+          email: userEmail,
+          userId: userId,
+          courseId,
+          paymentId: paymentIntent.id,
+          amount: paymentIntent.amount,
+          status: paymentIntent.status,
+        };
+
+        // ⭐ SAVE ORDER
+        await axios.post(`${BACKEND_URL}/api/order`, orderInfo, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
 
         toast.success("Course Purchased Successfully! 🎉");
         navigate("/purchases");
 
       } catch (err) {
-        toast.error(err.response?.data?.errors || "Already purchased!");
+        toast.error("Order saving failed");
       }
     }
 
     setLoading(false);
   };
 
+
   return (
     <>
-       {error ? (
+      {error ? (
         <div className="flex justify-center items-center h-screen">
-          <div className="bg-red-100 text-red-700 px-6 py-4 rounded-lg">
-            <p className="text-lg font-semibold">{error}</p>
-            <Link
-              className="w-full bg-orange-500 text-white py-2 rounded-md hover:bg-orange-600 transition duration-200 mt-3 flex items-center justify-center"
-              to={"/purchases"}
-            >
-              Purchases
-            </Link>
-          </div>
+          <div className="bg-red-200 p-4 rounded">{error}</div>
         </div>
       ) : (
         <div className="flex flex-col sm:flex-row my-40 container mx-auto">
+          
+          {/* LEFT: Course Info */}
           <div className="w-full md:w-1/2">
             <h1 className="text-xl font-semibold underline">Order Details</h1>
-            <div className="flex items-center text-center space-x-2 mt-4">
-              <h2 className="text-gray-600 text-sm">Total Price</h2>
-              <p className="text-red-500 font-bold">${course.price}</p>
+
+            <div className="flex items-center space-x-2 mt-4">
+              <h2 className="text-gray-600 text-sm">Total Price:</h2>
+              <p className="text-red-500 font-bold">${course?.price}</p>
             </div>
-            <div className="flex items-center text-center space-x-2">
-              <h1 className="text-gray-600 text-sm">Course name</h1>
-              <p className="text-red-500 font-bold">{course.title}</p>
+
+            <div className="flex items-center space-x-2">
+              <h2 className="text-gray-600 text-sm">Course:</h2>
+              <p className="text-red-500 font-bold">{course?.title}</p>
             </div>
           </div>
+
+          {/* RIGHT: Payment Form */}
           <div className="w-full md:w-1/2 flex justify-center items-center">
             <div className="bg-white shadow-md rounded-lg p-6 w-full max-w-sm">
-              <h2 className="text-lg font-semibold mb-4">
-                Process your Payment!
-              </h2>
-              <div className="mb-4">
-                <label
-                  className="block text-gray-700 text-sm mb-2"
-                  htmlFor="card-number"
+              <h2 className="text-lg font-semibold mb-4">Process your Payment!</h2>
+
+              <form onSubmit={handlePurchase}>
+                <CardElement />
+
+                <button
+                  type="submit"
+                  disabled={!stripe || loading}
+                  className="mt-8 w-full bg-indigo-500 text-white py-2 rounded-md"
                 >
-                  Credit/Debit Card
-                </label>
-                <form onSubmit={handlePurchase}>
-                  <CardElement
-                    options={{
-                      style: {
-                        base: {
-                          fontSize: "16px",
-                          color: "#424770",
-                          "::placeholder": {
-                            color: "#aab7c4",
-                          },
-                        },
-                        invalid: {
-                          color: "#9e2146",
-                        },
-                      },
-                    }}
-                  />
+                  {loading ? "Processing..." : "Pay"}
+                </button>
+              </form>
 
-                  <button
-                    type="submit"
-                    disabled={!stripe || loading} // Disable button when loading
-                    className="mt-8 w-full bg-indigo-500 text-white py-2 rounded-md hover:bg-indigo-600 transition duration-200"
-                  >
-                    {loading ? "Processing..." : "Pay"}
-                  </button>
-                </form>
-                {cardError && (
-                  <p className="text-red-500 font-semibold text-xs">
-                    {cardError}
-                  </p>
-                )}
-              </div>
-
-              <button className="w-full bg-orange-500 text-white py-2 rounded-md hover:bg-orange-600 transition duration-200 mt-3 flex items-center justify-center">
-                <span className="mr-2">🅿️</span> Other Payments Method
-              </button>
+              {cardError && (
+                <p className="text-red-500 text-xs">{cardError}</p>
+              )}
             </div>
           </div>
+
         </div>
       )}
     </>
