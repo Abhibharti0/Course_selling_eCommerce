@@ -39,7 +39,7 @@ function CourseCreate() {
 
     try {
       const response = await axios.post(
-        `${BACKEND_URL}/api/courses/create`,
+        `${BACKEND_URL}api/courses/create`,
         formData,
         {
           headers: {

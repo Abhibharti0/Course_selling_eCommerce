@@ -29,7 +29,7 @@ function Courses() {
   useEffect(() => {
     const fetchCourses = async () => {
       try {
-        const response = await axios.get(`${BACKEND_URL}/api/courses/allcourses`, {
+        const response = await axios.get(`${BACKEND_URL}api/courses/allcourses`, {
           withCredentials: true,
         });
         setCourses(response.data.courses);

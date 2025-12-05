@@ -33,7 +33,7 @@ function Buy() {
     const fetchPaymentIntent = async () => {
       try {
         const res = await axios.post(
-          `${BACKEND_URL}/api/courses/payment-intent/${courseId}`,
+          `${BACKEND_URL}api/courses/payment-intent/${courseId}`,
           {},
           {
             headers: { Authorization: `Bearer ${token}` },
