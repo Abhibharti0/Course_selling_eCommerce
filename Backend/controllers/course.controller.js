@@ -54,25 +54,41 @@ export const createCourse = async (req, res) => {
 export const updateCourse = async (req, res) => {
   const adminId = req.adminId;
   const { id } = req.params;
-  const { title, description, price, image } = req.body;
 
   try {
     const existingCourse = await Course.findOne({ _id: id, creatorId: adminId });
+
     if (!existingCourse) {
       return res.status(404).json({ message: "Course not found or unauthorized" });
     }
 
+    let updatedImage = existingCourse.image;
+
+    if (req.file) {
+      const uploadResult = await new Promise((resolve, reject) => {
+        cloudinary.uploader.upload_stream(
+          { folder: "courses" },
+          (err, result) => {
+            if (err) reject(err);
+            else resolve(result);
+          }
+        ).end(req.file.buffer);
+      });
+
+      updatedImage = {
+        public_id: uploadResult.public_id,
+        url: uploadResult.secure_url,
+      };
+    }
+
     const updatedData = {
-      title,
-      description,
-      price,
-      image: {
-        public_id: image?.public_id || existingCourse.image.public_id,
-        url: image?.url || existingCourse.image.url,
-      },
+      title: req.body.title ?? existingCourse.title,
+      description: req.body.description ?? existingCourse.description,
+      price: req.body.price ?? existingCourse.price,
+      image: updatedImage,
     };
 
-    await Course.updateOne({ _id: id }, updatedData);
+    await Course.findByIdAndUpdate(id, updatedData);
 
     return res.status(200).json({ message: "Course updated successfully" });
 
@@ -81,6 +97,8 @@ export const updateCourse = async (req, res) => {
     return res.status(500).json({ message: "Server Error" });
   }
 };
+
+
 
 // ------------------------- DELETE COURSE -------------------------
 export const deleteCourse = async (req, res) => {

@@ -11,7 +11,7 @@ router.post('/create', adminmiddleware ,createCourse);
 router.put('/update/:id', adminmiddleware,updateCourse);
 router.delete('/delete/:id', adminmiddleware,deleteCourse);
 router.get('/allcourses', getAllCourses);
-router.get('/getonecouse/:id', getCourseById);
+router.get('/getonecourse/:id', getCourseById);
 
 router.post("/payment-intent/:courseId", usermiddleware, createPaymentIntent);
 
