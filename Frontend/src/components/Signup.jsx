@@ -24,7 +24,7 @@ const [lastname, setlastname] = useState("");
 
     try {
       const response = await axios.post(
-  `{BACKEND_URL}api/users/signup`,
+  `{BACKEND_URL}/api/users/signup`,
   {
     firstname, 
     lastname,  

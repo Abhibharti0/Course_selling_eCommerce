@@ -21,7 +21,7 @@ function AdminSignup() {
 
     try {
       const response = await axios.post(
-        `${BACKEND_URL}api/admin/signup`,
+        `${BACKEND_URL}/api/admin/signup`,
         {
           firstname: firstName,   // FIXED
           lastname: lastName,     // FIXED

@@ -46,7 +46,7 @@ function OurCourses() {
   const handleDelete = async (id) => {
     try {
       const response = await axios.delete(
-        `${BACKEND_URL}api/courses/delete/${id}`,
+        `${BACKEND_URL}/api/courses/delete/${id}`,
         {
           headers: { Authorization: `Bearer ${token}` },
           withCredentials: true,

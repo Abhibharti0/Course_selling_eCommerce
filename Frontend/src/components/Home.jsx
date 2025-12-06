@@ -26,8 +26,8 @@ const Home = () => {
 
   const handleLogout = async () => {
   try {
-    const response = await axios.get(
-  `${BACKEND_URL}api/users/logout`,
+    const response = await axios.post(
+  `${BACKEND_URL}/api/users/logout`,
   { withCredentials: true }
 );
 
@@ -48,7 +48,7 @@ const Home = () => {
      const fetchCourses =async () => {
        try {
 
-        const response= await axios.get(`${BACKEND_URL}api/courses/allcourses`,
+        const response= await axios.get(`${BACKEND_URL}/api/courses/allcourses`,
           { withCredentials: true }
         )
         console.log("Courses data:", response.data.courses);

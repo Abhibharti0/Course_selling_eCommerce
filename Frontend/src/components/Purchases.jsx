@@ -37,7 +37,7 @@ const Purchases = () => {
 
     try {
       const response = await axios.get(
-        `${BACKEND_URL}api/users/mycourses`,
+        `${BACKEND_URL}/api/users/mycourses`,
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -60,7 +60,7 @@ const Purchases = () => {
   // Logout
   const handleLogout = async () => {
     try {
-      const response = await axios.get(`${BACKEND_URL}api/users/logout`, {
+      const response = await axios.get(`${BACKEND_URL}/api/users/logout`, {
         withCredentials: true,
       });
       toast.success(response.data.message);
