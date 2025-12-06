@@ -60,7 +60,7 @@ const Purchases = () => {
   // Logout
   const handleLogout = async () => {
     try {
-      const response = await axios.get(`http://localhost:5000/api/users/logout`, {
+      const response = await axios.get(`${BACKEND_URL}api/users/logout`, {
         withCredentials: true,
       });
       toast.success(response.data.message);
