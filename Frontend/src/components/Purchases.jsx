@@ -14,7 +14,8 @@ const Purchases = () => {
 
   const [purchases, setPurchase] = useState([]);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [errorMessage, setErrorMessage] = useState(true);
+  const [errorMessage, setErrorMessage] = useState("");
+
   const [isSidebarOpen, setIsSidebarOpen] = useState(false); // State to toggle sidebar
 
   console.log("purchases",purchases)
@@ -58,18 +59,23 @@ const Purchases = () => {
 
 
   // Logout
-  const handleLogout = async () => {
-    try {
-      const response = await axios.post(`${BACKEND_URL}/api/users/logout`, {
-        withCredentials: true,
-      });
-      toast.success(response.data.message);
-      localStorage.removeItem("user");
-      setIsLoggedIn(false);
-    } catch (error) {
-      toast.error(error.response?.data?.errors || "Error in logging out");
-    }
-  };
+  
+const handleLogout = async () => {
+  try {
+    const response = await axios.post(
+      `${BACKEND_URL}/api/users/logout`,
+      {},
+      { withCredentials: true }
+    );
+
+    toast.success(response.data.message);
+    localStorage.removeItem("user");
+    setIsLoggedIn(false);
+  } catch (error) {
+    toast.error(error.response?.data?.errors || "Error in logging out");
+  }
+};
+
 
   // Toggle sidebar for mobile devices
   const toggleSidebar = () => {
@@ -171,7 +177,7 @@ const Purchases = () => {
                   <div className="text-center">
                     <h3 className="text-lg font-bold">{purchase.title}</h3>
                     <p className="text-gray-500">
-                      {purchase.description.length > 100
+                      {purchase.description?.length > 100
                         ? `${purchase.description.slice(0, 100)}...`
                         : purchase.description}
                     </p>

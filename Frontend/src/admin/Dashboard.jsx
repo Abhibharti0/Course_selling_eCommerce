@@ -8,24 +8,25 @@ import { BACKEND_URL } from "../utils/utils";
 function Dashboard() {
   const navigate = useNavigate();
 
-  const handleLogout = async () => {
-    try {
-      const response = await axios.post(`${BACKEND_URL}/api/admin/logout`, {
-        withCredentials: true,
-      });
+ const handleLogout = async () => {
+  try {
+    const response = await axios.post(
+      `${BACKEND_URL}/api/admin/logout`,
+      {},
+      { withCredentials: true }
+    );
 
-      toast.success(response.data.message);
+    toast.success(response.data.message);
 
-      // Remove admin token
-      localStorage.removeItem("admin");
+    localStorage.removeItem("admin");
 
-      // Redirect
-      navigate("/admin/login");
-    } catch (error) {
-      console.log("Error logging out:", error);
-      toast.error(error.response?.data?.errors || "Error in logging out");
-    }
-  };
+    navigate("/admin/login");
+  } catch (error) {
+    console.log("Error logging out:", error);
+    toast.error(error.response?.data?.errors || "Error in logging out");
+  }
+};
+
 
   return (
     <div className="flex h-screen">

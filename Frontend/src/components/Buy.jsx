@@ -22,7 +22,7 @@ function Buy() {
   const user = JSON.parse(localStorage.getItem("user"));
   const token = user?.token;
 
-  if (!token) navigate("/login");
+  
 
   // Safe extraction of user email & id (works in all structures)
   const userEmail = user?.user?.email || user?.email;
@@ -30,6 +30,10 @@ function Buy() {
 
   // ⭐ STEP 1 — Fetch PaymentIntent + Course Info
   useEffect(() => {
+    if (!token) {
+    navigate("/login");
+    return;
+  }
     const fetchPaymentIntent = async () => {
       try {
         const res = await axios.post(
@@ -117,7 +121,7 @@ function Buy() {
         };
 
         // ⭐ SAVE ORDER
-        await axios.post(`${BACKEND_URL}/api/order`, orderInfo, {
+        await axios.post(`${BACKEND_URL}/api/order/`, orderInfo, {
           headers: { Authorization: `Bearer ${token}` },
         });
 

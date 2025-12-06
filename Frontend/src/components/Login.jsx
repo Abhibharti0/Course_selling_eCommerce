@@ -36,13 +36,24 @@ function Login() {
      toast.success(response.data.message);
       localStorage.setItem(
   "user",
-  JSON.stringify({ token: response.data.token })
+  JSON.stringify({
+    token: response.data.token,
+    user: response.data.user
+  })
 );
-      navigate("/");
+setTimeout(() => {
+  navigate("/");
+}, 300);
+
     } catch (error) {
       if (error.response) {
         
-        setErrorMessage(error.response.data.errors || "Login failed!!!");
+        setErrorMessage(
+  error.response.data.message ||
+  error.response.data.errors ||
+  "Login failed!"
+);
+
       }
     }
   };
