@@ -26,7 +26,7 @@ const Home = () => {
 
   const handleLogout = async () => {
   try {
-    const response = await axios.post(
+    const response = await axios.get(
   `${BACKEND_URL}/api/users/logout`,
   { withCredentials: true }
 );
@@ -87,15 +87,10 @@ const Home = () => {
     {
       breakpoint: 600,
       settings: {
-        slidesToShow: 2,
-      },
-    },
-    {
-      breakpoint: 480,
-      settings: {
         slidesToShow: 1,
       },
     },
+    
   ],
 };
 
