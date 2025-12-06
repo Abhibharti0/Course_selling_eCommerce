@@ -46,7 +46,7 @@ function Courses() {
   // Logout
   const handleLogout = async () => {
     try {
-      const response = await axios.get(`${BACKEND_URL}/api/users/logout`, {
+      const response = await axios.post(`${BACKEND_URL}/api/users/logout`, {
         withCredentials: true,
       });
       toast.success(response.data.message);

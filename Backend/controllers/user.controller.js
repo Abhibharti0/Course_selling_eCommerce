@@ -44,59 +44,51 @@ export const signup = async (req,res) =>{
 };
 
 
-export const login = async (req,res) =>{
-    const {email,password} = req.body;
+export const login = async (req, res) => {
+  try {
+    const { email, password } = req.body;
 
-    try{
-         const user = await User.findOne({ email });
-        if (!user) {
-            return res.status(400).json({ message: "Invalid email or password" });
-        }
+    const user = await User.findOne({ email });
+    if (!user) return res.status(400).json({ message: "Invalid email or password" });
 
-        const isPasswordCorrect = await bcrypt.compare(password, user.password);
-        if (!isPasswordCorrect) {
-            return res.status(400).json({ message: "Invalid email or password" });
-        } 
-        //jwt token generation
-        const token = jwt.sign(
-           {id:user.id
-           }, config.JWT_USER_PASSWORD,
-           {expiresIn:'1d'});
+    const match = await bcrypt.compare(password, user.password);
+    if (!match) return res.status(400).json({ message: "Invalid email or password" });
 
-           const cookieOptions = {
-             expires: new Date(Date.now() + 24 * 60 * 60 * 1000),
-            httpOnly: true,
-           secure: true,
-          sameSite: "None",
-           };
+    const token = jwt.sign({ id: user._id }, config.JWT_USER_PASSWORD, { expiresIn: "1d" });
 
-           res.cookie("jwt", token,cookieOptions)
-        res.status(200).json({message:"Login successful", user,token});
-} catch(error){
-    res.status(500).json({message:"Error in login"});
-    console.log("error", error);
-}
-}
+    const isProduction = process.env.NODE_ENV === "production";
+
+    res.cookie("jwt", token, {
+      httpOnly: true,
+      secure: isProduction,
+      sameSite: isProduction ? "None" : "Lax",
+      maxAge: 24 * 60 * 60 * 1000,
+    });
+
+    res.status(200).json({ message: "Login successful", user });
+  } catch (error) {
+    res.status(500).json({ message: "Error in login" });
+  }
+};
+
 
 
 export const logout = (req, res) => {
   try {
-    if (!req.cookies.jwt) {
-      return res.status(400).json({ message: "kindly login first" });
-    }
+    const isProduction = process.env.NODE_ENV === "production";
 
     res.clearCookie("jwt", {
       httpOnly: true,
-      secure: true,
-      sameSite: "None",
+      secure: isProduction,
+      sameSite: isProduction ? "None" : "Lax",
     });
 
-    res.status(200).json({ message: "Logout successful" });
+    return res.status(200).json({ message: "Logout successful" });
   } catch (error) {
-    res.status(500).json({ message: "Error in logout" });
-    console.log("error", error);
+    return res.status(500).json({ message: "Error in logout" });
   }
 };
+
 
 
 

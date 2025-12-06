@@ -26,7 +26,7 @@ const Home = () => {
 
   const handleLogout = async () => {
   try {
-    const response = await axios.get(
+    const response = await axios.post(
   `${BACKEND_URL}/api/users/logout`,
   { withCredentials: true }
 );
