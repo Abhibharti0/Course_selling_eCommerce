@@ -81,16 +81,23 @@ export const login = async (req,res) =>{
 
 export const logout = (req, res) => {
   try {
-    if(!req.cookies.jwt){
+    if (!req.cookies.jwt) {
       return res.status(400).json({ message: "kindly login first" });
     }
-    res.clearCookie("jwt");
+
+    res.clearCookie("jwt", {
+      httpOnly: true,
+      secure: true,
+      sameSite: "None",
+    });
+
     res.status(200).json({ message: "Logout successful" });
   } catch (error) {
     res.status(500).json({ message: "Error in logout" });
     console.log("error", error);
-  } 
-}
+  }
+};
+
 
 
 export const mycourse = async (req, res) => {
